@@ -23,6 +23,8 @@ import java.util.UUID;
  * to the caller.
  */
 @Service
+// @Transactional: Specifies that a method or class should be executed within a transactional context.
+// representing a single, logical unit of work that executes a series of operations on a database or another resource. 
 @Transactional
 public class UserService {
 
@@ -30,6 +32,7 @@ public class UserService {
 
   private final UserRepository userRepository;
 
+  // The @Autowired annotation in Spring Framework is used for automatic dependency injection. 
   @Autowired
   public UserService(@Qualifier("userRepository") UserRepository userRepository) {
     this.userRepository = userRepository;
@@ -43,13 +46,23 @@ public class UserService {
     newUser.setToken(UUID.randomUUID().toString());
     newUser.setStatus(UserStatus.OFFLINE);
     checkIfUserExists(newUser);
+    newUser.setStatus(UserStatus.ONLINE);
     // saves the given entity but data is only persisted in the database once
     // flush() is called
     newUser = userRepository.save(newUser);
     userRepository.flush();
+    // after create a newUser and save the data, we set it as ONLINE
 
     log.debug("Created Information for User: {}", newUser);
     return newUser;
+  }
+
+  public boolean validateUser(User toBeValidatedUser){
+    return userRepository.findByUsernameAndPwd(toBeValidatedUser.getUsername(), toBeValidatedUser.getPwd()) != null;
+  }
+
+  public User getUserById(Long userId) {
+    return userRepository.findById(userId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
   }
 
   /**
@@ -68,12 +81,16 @@ public class UserService {
 
     String baseErrorMessage = "The %s provided %s not unique. Therefore, the user could not be created!";
     if (userByUsername != null && userByName != null) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+      //  ResponseStatusException is designed to map directly to an HTTP response.
+      // Spring uses the status and message contained within the exception to construct an HTTP response.
+      throw new ResponseStatusException(HttpStatus.CONFLICT,
           String.format(baseErrorMessage, "username and the name", "are"));
     } else if (userByUsername != null) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format(baseErrorMessage, "username", "is"));
+      throw new ResponseStatusException(HttpStatus.CONFLICT, String.format(baseErrorMessage, "username", "is"));
     } else if (userByName != null) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format(baseErrorMessage, "name", "is"));
+      throw new ResponseStatusException(HttpStatus.CONFLICT, String.format(baseErrorMessage, "name", "is"));
     }
   }
+
+
 }

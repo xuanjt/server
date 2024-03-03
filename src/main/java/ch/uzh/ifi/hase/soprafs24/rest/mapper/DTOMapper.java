@@ -22,13 +22,20 @@ public interface DTOMapper {
 
   DTOMapper INSTANCE = Mappers.getMapper(DTOMapper.class);
 
-  @Mapping(source = "name", target = "name")
+  // only define the function convertUserPostDTOtoEntity, but didn't implement it
+  // 定义映射接口方法而不提供实现体是一种常见且预期的做法。原因在于MapStruct框架的工作机制和设计目的。
+  // MapStruct是一个编译时代码生成工具，旨在简化对象之间的转换工作。
+  // 当你使用MapStruct定义了一个映射接口和其方法时，MapStruct会在编译期间自动生成这些方法的实现代码。
   @Mapping(source = "username", target = "username")
+  @Mapping(source = "name", target = "name")
+  @Mapping(source = "pwd", target = "pwd")
   User convertUserPostDTOtoEntity(UserPostDTO userPostDTO);
 
   @Mapping(source = "id", target = "id")
   @Mapping(source = "name", target = "name")
+  @Mapping(source = "pwd", target = "pwd")
   @Mapping(source = "username", target = "username")
   @Mapping(source = "status", target = "status")
+  @Mapping(source = "date", target = "date")
   UserGetDTO convertEntityToUserGetDTO(User user);
 }

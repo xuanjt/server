@@ -1,13 +1,17 @@
 package ch.uzh.ifi.hase.soprafs24.rest.dto;
 
+import java.time.LocalDateTime;
+
 import ch.uzh.ifi.hase.soprafs24.constant.UserStatus;
 
 public class UserGetDTO {
 
   private Long id;
   private String name;
+  private String pwd;
   private String username;
   private UserStatus status;
+  private LocalDateTime date;
 
   public Long getId() {
     return id;
@@ -17,12 +21,12 @@ public class UserGetDTO {
     this.id = id;
   }
 
-  public String getName() {
-    return name;
+  public String getPwd() {
+    return pwd;
   }
 
-  public void setName(String name) {
-    this.name = name;
+  public void setPwd(String pwd) {
+    this.pwd = pwd;
   }
 
   public String getUsername() {
@@ -39,5 +43,22 @@ public class UserGetDTO {
 
   public void setStatus(UserStatus status) {
     this.status = status;
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
+  }
+
+    // 构造函数、Getter和Setter
+  public LocalDateTime getDate() {
+      return date;
+  }
+
+  public void setDate(LocalDateTime date) {
+      this.date = date;
   }
 }

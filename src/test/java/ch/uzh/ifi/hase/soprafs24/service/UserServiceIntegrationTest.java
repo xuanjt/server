@@ -41,6 +41,7 @@ public class UserServiceIntegrationTest {
 
     User testUser = new User();
     testUser.setName("testName");
+    testUser.setPwd("testPwd");
     testUser.setUsername("testUsername");
 
     // when
@@ -51,7 +52,8 @@ public class UserServiceIntegrationTest {
     assertEquals(testUser.getName(), createdUser.getName());
     assertEquals(testUser.getUsername(), createdUser.getUsername());
     assertNotNull(createdUser.getToken());
-    assertEquals(UserStatus.OFFLINE, createdUser.getStatus());
+    // modify: set status to ONLINE
+    assertEquals(UserStatus.ONLINE, createdUser.getStatus());
   }
 
   @Test
@@ -60,6 +62,7 @@ public class UserServiceIntegrationTest {
 
     User testUser = new User();
     testUser.setName("testName");
+    testUser.setPwd("testPwd");
     testUser.setUsername("testUsername");
     User createdUser = userService.createUser(testUser);
 
@@ -68,6 +71,7 @@ public class UserServiceIntegrationTest {
 
     // change the name but forget about the username
     testUser2.setName("testName2");
+    testUser2.setPwd("testPwd");
     testUser2.setUsername("testUsername");
 
     // check that an error is thrown

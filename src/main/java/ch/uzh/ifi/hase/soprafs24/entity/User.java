@@ -3,7 +3,12 @@ package ch.uzh.ifi.hase.soprafs24.entity;
 import ch.uzh.ifi.hase.soprafs24.constant.UserStatus;
 
 import javax.persistence.*;
+
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
 import java.io.Serializable;
+import java.time.LocalDateTime;
 
 /**
  * Internal User Representation
@@ -17,6 +22,7 @@ import java.io.Serializable;
  */
 @Entity
 @Table(name = "USER")
+@EntityListeners(AuditingEntityListener.class)
 public class User implements Serializable {
 
   private static final long serialVersionUID = 1L;
@@ -25,17 +31,32 @@ public class User implements Serializable {
   @GeneratedValue
   private Long id;
 
-  @Column(nullable = false)
+  @CreatedDate
+  @Column(nullable = false, updatable = false)
+  private LocalDateTime date;
+
+  @Column(nullable = false, unique = true)
   private String name;
 
   @Column(nullable = false, unique = true)
   private String username;
+
+  @Column(nullable = false)
+  private String pwd;
 
   @Column(nullable = false, unique = true)
   private String token;
 
   @Column(nullable = false)
   private UserStatus status;
+
+  public LocalDateTime getDate() {
+    return date;
+  }
+
+  public void setDate(LocalDateTime date) {
+    this.date = date;
+  }
 
   public Long getId() {
     return id;
@@ -45,12 +66,12 @@ public class User implements Serializable {
     this.id = id;
   }
 
-  public String getName() {
-    return name;
+  public String getPwd() {
+    return pwd;
   }
 
-  public void setName(String name) {
-    this.name = name;
+  public void setPwd(String pwd) {
+    this.pwd = pwd;
   }
 
   public String getUsername() {
@@ -59,6 +80,14 @@ public class User implements Serializable {
 
   public void setUsername(String username) {
     this.username = username;
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
   }
 
   public String getToken() {

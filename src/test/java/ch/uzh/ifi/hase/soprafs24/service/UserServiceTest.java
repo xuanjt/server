@@ -31,6 +31,7 @@ public class UserServiceTest {
     testUser = new User();
     testUser.setId(1L);
     testUser.setName("testName");
+    testUser.setPwd("testPwd");
     testUser.setUsername("testUsername");
 
     // when -> any object is being save in the userRepository -> return the dummy
@@ -51,7 +52,8 @@ public class UserServiceTest {
     assertEquals(testUser.getName(), createdUser.getName());
     assertEquals(testUser.getUsername(), createdUser.getUsername());
     assertNotNull(createdUser.getToken());
-    assertEquals(UserStatus.OFFLINE, createdUser.getStatus());
+    // modify: set status to ONLINE
+    assertEquals(UserStatus.ONLINE, createdUser.getStatus());
   }
 
   @Test
