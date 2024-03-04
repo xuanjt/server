@@ -33,20 +33,30 @@ public class UserController {
     this.userService = userService;
   }
 
-  // @GetMapping("/users")
-  // @ResponseStatus(HttpStatus.OK)
+  @GetMapping("/users/{userId}")
+  @ResponseStatus(HttpStatus.OK)
   // @ResponseBody
-  // public List<UserGetDTO> getAllUsers() {
-  //   // fetch all users in the internal representation
-  //   List<User> users = userService.getUsers();
-  //   List<UserGetDTO> userGetDTOs = new ArrayList<>();
+  public UserGetDTO getUserProfile(@PathVariable Long userId) {
+      System.out.println("Hello, World!");
+      User user = userService.getUserById(userId);
+      return DTOMapper.INSTANCE.convertEntityToUserGetDTO(user);
+  }
 
-  //   // convert each user to the API representation
-  //   for (User user : users) {
-  //     userGetDTOs.add(DTOMapper.INSTANCE.convertEntityToUserGetDTO(user));
-  //   }
-  //   return userGetDTOs;
-  // }
+  @GetMapping("/users")
+  @ResponseStatus(HttpStatus.OK)
+  @ResponseBody
+  public List<UserGetDTO> getAllUsers() {
+    // fetch all users in the internal representation
+    System.out.println("Not right!");
+    List<User> users = userService.getUsers();
+    List<UserGetDTO> userGetDTOs = new ArrayList<>();
+
+    // convert each user to the API representation
+    for (User user : users) {
+      userGetDTOs.add(DTOMapper.INSTANCE.convertEntityToUserGetDTO(user));
+    }
+    return userGetDTOs;
+  }
 
   // This annotation is used to map HTTP POST requests onto the createUser method. 
   // When a POST request is made to /users, this method is invoked.
@@ -80,12 +90,4 @@ public class UserController {
       }
   }
 
-  @GetMapping("/users/{userId}")
-  @ResponseStatus(HttpStatus.OK)
-  @ResponseBody
-  public UserGetDTO getUserProfile(@PathVariable Long userId) {
-      System.out.println("Hello, World!");
-      User user = userService.getUserById(userId);
-      return DTOMapper.INSTANCE.convertEntityToUserGetDTO(user);
-  }
 }
