@@ -33,7 +33,7 @@ public class User implements Serializable {
 
   @CreatedDate
   @Column(nullable = false, updatable = false)
-  private LocalDateTime date;
+  private LocalDateTime creationdate;
 
   @Column(nullable = false, unique = true)
   private String name;
@@ -50,12 +50,12 @@ public class User implements Serializable {
   @Column(nullable = false)
   private UserStatus status;
 
-  public LocalDateTime getDate() {
-    return date;
+  public LocalDateTime getCreationdate() {
+    return creationdate;
   }
 
-  public void setDate(LocalDateTime date) {
-    this.date = date;
+  public void setCreationdate(LocalDateTime creationdate) {
+    this.creationdate = creationdate;
   }
 
   public Long getId() {

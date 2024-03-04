@@ -11,7 +11,7 @@ public class UserGetDTO {
   private String pwd;
   private String username;
   private UserStatus status;
-  private LocalDateTime date;
+  private LocalDateTime creationdate;
 
   public Long getId() {
     return id;
@@ -54,11 +54,11 @@ public class UserGetDTO {
   }
 
     // 构造函数、Getter和Setter
-  public LocalDateTime getDate() {
-      return date;
+  public LocalDateTime getCreationdate() {
+      return creationdate;
   }
 
-  public void setDate(LocalDateTime date) {
-      this.date = date;
+  public void setCreationdate(LocalDateTime creationdate) {
+      this.creationdate = creationdate;
   }
 }

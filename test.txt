@@ -1,15 +1,14 @@
-    async function fetchUserProfile(userId) {
-        const response = await fetch(`/users/${userId}`);
-        console.log(response.body);
-        const data = await response.json(); // 使用.json()方法异步解析响应体为JSON
-        // waits until the request completes...
-    }
-    这里的userId传输到server的endpoint是什么类型，与下面server端代码的数据类型匹配吗
+     const user = new User(response.data);
+      
+      console.log(user)
+      setCurrentUser(user);
 
-    @GetMapping("/users/{userId}")
-  @ResponseStatus(HttpStatus.OK)
-  public UserGetDTO getUserProfile(@PathVariable String userId) {
-      User user = userService.getUserById(userId);
+      console.log(currentUser);
+为什么用这种方式currentUser不是null
 
-      return DTOMapper.INSTANCE.convertEntityToUserGetDTO(user);
-  }
+而用下面这种方式currentUser 就是null
+     const user = new User(response.data);
+      
+      setCurrentUser(user);
+
+      console.log(currentUser);
