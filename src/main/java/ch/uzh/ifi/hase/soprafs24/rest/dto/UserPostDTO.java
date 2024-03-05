@@ -1,5 +1,8 @@
 package ch.uzh.ifi.hase.soprafs24.rest.dto;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 public class UserPostDTO {
 
   private String pwd;
@@ -7,6 +10,8 @@ public class UserPostDTO {
   private String name;
 
   private String username;
+
+  private LocalDate birthdate;
 
   public String getPwd() {
     return pwd;
@@ -29,5 +34,13 @@ public class UserPostDTO {
 
   public void setName(String name) {
     this.name = name;
+  }
+
+  public LocalDate getBirthdate() {
+      return birthdate;
+  }
+
+  public void setBirthdate(LocalDate birthdate) {
+      this.birthdate = birthdate;
   }
 }

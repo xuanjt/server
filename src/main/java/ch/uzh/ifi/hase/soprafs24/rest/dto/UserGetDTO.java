@@ -1,6 +1,9 @@
 package ch.uzh.ifi.hase.soprafs24.rest.dto;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 import ch.uzh.ifi.hase.soprafs24.constant.UserStatus;
 
@@ -11,7 +14,10 @@ public class UserGetDTO {
   private String pwd;
   private String username;
   private UserStatus status;
-  private LocalDateTime creationdate;
+
+  private LocalDate creationdate;
+
+  private LocalDate birthdate;
 
   public Long getId() {
     return id;
@@ -54,11 +60,19 @@ public class UserGetDTO {
   }
 
     // 构造函数、Getter和Setter
-  public LocalDateTime getCreationdate() {
+  public LocalDate getCreationdate() {
       return creationdate;
   }
 
-  public void setCreationdate(LocalDateTime creationdate) {
+  public void setCreationdate(LocalDate creationdate) {
       this.creationdate = creationdate;
+  }
+
+  public LocalDate getBirthdate() {
+      return birthdate;
+  }
+
+  public void setBirthdate(LocalDate birthdate) {
+      this.birthdate = birthdate;
   }
 }

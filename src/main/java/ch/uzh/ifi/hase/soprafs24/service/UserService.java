@@ -57,12 +57,27 @@ public class UserService {
     return newUser;
   }
 
-  public boolean validateUser(User toBeValidatedUser){
-    return userRepository.findByUsernameAndPwd(toBeValidatedUser.getUsername(), toBeValidatedUser.getPwd()) != null;
+  public User validateUser(User toBeValidatedUser){
+    User possibleUser = userRepository.findByUsernameAndPwd(toBeValidatedUser.getUsername(), toBeValidatedUser.getPwd());
+    if (possibleUser != null){
+      return possibleUser;
+    }else{
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Invalid username or password.");
+    }
   }
 
   public User getUserById(Long userId) {
     return userRepository.findById(userId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+  }
+
+  public User updateUserInfo(User user, User userInput){
+    if (userInput.getName() != null) {
+      checkIfUserExists(userInput);
+      user.setName(userInput.getName());}
+    if (userInput.getBirthdate() != null) {user.setBirthdate(userInput.getBirthdate());}
+    user = userRepository.save(user);
+    userRepository.flush();
+    return user;
   }
 
   /**

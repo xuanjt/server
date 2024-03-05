@@ -7,8 +7,10 @@ import javax.persistence.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import java.io.Serializable;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 /**
  * Internal User Representation
@@ -33,12 +35,15 @@ public class User implements Serializable {
 
   @CreatedDate
   @Column(nullable = false, updatable = false)
-  private LocalDateTime creationdate;
+  private LocalDate creationdate;
+
+  @Column(nullable = true, updatable = true)
+  private LocalDate birthdate;
 
   @Column(nullable = false, unique = true)
   private String name;
 
-  @Column(nullable = false, unique = true)
+  @Column(nullable = false, unique = true, updatable = true)
   private String username;
 
   @Column(nullable = false)
@@ -50,12 +55,20 @@ public class User implements Serializable {
   @Column(nullable = false)
   private UserStatus status;
 
-  public LocalDateTime getCreationdate() {
+  public LocalDate getCreationdate() {
     return creationdate;
   }
 
-  public void setCreationdate(LocalDateTime creationdate) {
+  public void setCreationdate(LocalDate creationdate) {
     this.creationdate = creationdate;
+  }
+
+  public LocalDate getBirthdate() {
+    return birthdate;
+  }
+
+  public void setBirthdate(LocalDate birthdate) {
+    this.birthdate = birthdate;
   }
 
   public Long getId() {

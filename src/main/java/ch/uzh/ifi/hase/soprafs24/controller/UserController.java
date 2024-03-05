@@ -33,11 +33,21 @@ public class UserController {
     this.userService = userService;
   }
 
+  @PutMapping("/users/{userId}")
+  @ResponseStatus(HttpStatus.OK)
+  @ResponseBody
+  public UserGetDTO updateUserProfile(@PathVariable Long userId, @RequestBody UserPostDTO userPostDTO) {
+      User user = userService.getUserById(userId);
+      User userInput = DTOMapper.INSTANCE.convertUserPostDTOtoEntity(userPostDTO);
+      User userUpdated = userService.updateUserInfo(user, userInput);
+
+      return DTOMapper.INSTANCE.convertEntityToUserGetDTO(userUpdated);
+  }
+
   @GetMapping("/users/{userId}")
   @ResponseStatus(HttpStatus.OK)
-  // @ResponseBody
+  @ResponseBody
   public UserGetDTO getUserProfile(@PathVariable Long userId) {
-      System.out.println("Hello, World!");
       User user = userService.getUserById(userId);
       return DTOMapper.INSTANCE.convertEntityToUserGetDTO(user);
   }
@@ -47,7 +57,6 @@ public class UserController {
   @ResponseBody
   public List<UserGetDTO> getAllUsers() {
     // fetch all users in the internal representation
-    System.out.println("Not right!");
     List<User> users = userService.getUsers();
     List<UserGetDTO> userGetDTOs = new ArrayList<>();
 
@@ -76,18 +85,16 @@ public class UserController {
   }
 
   @PostMapping("/users/loggers")
-  public ResponseEntity<?> validateUser(@RequestBody UserPostDTO userPostDTO) {
+  @ResponseStatus(HttpStatus.OK)
+  @ResponseBody
+  public UserGetDTO validateUser(@RequestBody UserPostDTO userPostDTO) {
       // Convert API user to internal representation
       User userInput = DTOMapper.INSTANCE.convertUserPostDTOtoEntity(userPostDTO);
 
-      boolean isValidUser = userService.validateUser(userInput);
-      if (isValidUser) {
-          // Assuming you want to return some user info on successful login
-          UserGetDTO userGetDTO = DTOMapper.INSTANCE.convertEntityToUserGetDTO(userInput);
-          return ResponseEntity.ok(userGetDTO); // Return UserGetDTO with 200 OK
-      } else {
-          return ResponseEntity.badRequest().body("Invalid username or password.");
-      }
+      User validUser = userService.validateUser(userInput);
+
+      return DTOMapper.INSTANCE.convertEntityToUserGetDTO(validUser);
   }
+
 
 }
