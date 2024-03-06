@@ -27,13 +27,11 @@ public interface DTOMapper {
   // MapStruct是一个编译时代码生成工具，旨在简化对象之间的转换工作。
   // 当你使用MapStruct定义了一个映射接口和其方法时，MapStruct会在编译期间自动生成这些方法的实现代码。
   @Mapping(source = "username", target = "username")
-  @Mapping(source = "name", target = "name")
   @Mapping(source = "pwd", target = "pwd")
   @Mapping(source = "birthdate", target = "birthdate")
   User convertUserPostDTOtoEntity(UserPostDTO userPostDTO);
 
   @Mapping(source = "id", target = "id")
-  @Mapping(source = "name", target = "name")
   @Mapping(source = "pwd", target = "pwd")
   @Mapping(source = "username", target = "username")
   @Mapping(source = "status", target = "status")

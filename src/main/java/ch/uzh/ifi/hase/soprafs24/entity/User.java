@@ -40,9 +40,6 @@ public class User implements Serializable {
   @Column(nullable = true, updatable = true)
   private LocalDate birthdate;
 
-  @Column(nullable = false, unique = true)
-  private String name;
-
   @Column(nullable = false, unique = true, updatable = true)
   private String username;
 
@@ -93,14 +90,6 @@ public class User implements Serializable {
 
   public void setUsername(String username) {
     this.username = username;
-  }
-
-  public String getName() {
-    return name;
-  }
-
-  public void setName(String name) {
-    this.name = name;
   }
 
   public String getToken() {

@@ -71,9 +71,10 @@ public class UserService {
   }
 
   public User updateUserInfo(User user, User userInput){
-    if (userInput.getName() != null) {
+    if (userInput.getUsername() != null) {
+      System.out.println("you're changing username!");
       checkIfUserExists(userInput);
-      user.setName(userInput.getName());}
+      user.setUsername(userInput.getUsername());}
     if (userInput.getBirthdate() != null) {user.setBirthdate(userInput.getBirthdate());}
     user = userRepository.save(user);
     userRepository.flush();
@@ -92,18 +93,10 @@ public class UserService {
    */
   private void checkIfUserExists(User userToBeCreated) {
     User userByUsername = userRepository.findByUsername(userToBeCreated.getUsername());
-    User userByName = userRepository.findByName(userToBeCreated.getName());
 
     String baseErrorMessage = "The %s provided %s not unique. Therefore, the user could not be created!";
-    if (userByUsername != null && userByName != null) {
-      //  ResponseStatusException is designed to map directly to an HTTP response.
-      // Spring uses the status and message contained within the exception to construct an HTTP response.
-      throw new ResponseStatusException(HttpStatus.CONFLICT,
-          String.format(baseErrorMessage, "username and the name", "are"));
-    } else if (userByUsername != null) {
+    if (userByUsername != null) {
       throw new ResponseStatusException(HttpStatus.CONFLICT, String.format(baseErrorMessage, "username", "is"));
-    } else if (userByName != null) {
-      throw new ResponseStatusException(HttpStatus.CONFLICT, String.format(baseErrorMessage, "name", "is"));
     }
   }
 

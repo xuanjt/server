@@ -1,70 +1,32 @@
-const UserProfile = () => {
-  const { userId } = useParams(); // 使用 useParams 钩子获取动态路由参数
-  const navigate = useNavigate();
-  const [user, setUser] = useState<User>(null);
-  const { currentUser } = useUserContext();
-  const [birthdate, setBirthdate] = useState<string>(null);
-  const [birthdateediting, setBirthdateediting] = useState<boolean>(false);
-
-  console.log(currentUser);
-
-  const updateBirthdate = async () => {
-    try {
-      const requestBody = JSON.stringify({ birthdate });
-      await api.put(`/users/${userId}`, requestBody, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      // 如果更新成功，可以选择在这里重新获取用户信息或直接更新本地状态
-      setUser(prevState => ({ ...prevState, birthdate }));
-    } catch (error) {
-      console.error("Failed to update birthdate:", error);
-    }
-  };
-
-  useEffect(() => {
-    // effect callbacks are synchronous to prevent race conditions. So we put the async function inside:
-    async function fetchUserInfo() {
-      try {
-        const response = await api.get(`/users/${userId}`);
-        console.log("hhhhhhhhh");
-        setUser(response.data);
-      } catch (error) {
-        console.error("Failed to fetch user:", error);
-      }
-    }
-    fetchUserInfo();}, [userId]);
-  
   let content;
-  if (user.id === currentUser.id && birthdateediting === false) { // 假设用户没有生日信息，显示输入框和提交按钮
-    content = (
-      <div>
-        <FormFieldInput
-          label="Birthday:"
-          value={birthdate}
-          onChange={(un: string) => {setBirthdate(un); setBirthdateediting(true)}}
-        />
-        <button className = "profile button-container" onClick={updateBirthdate()}>Submit Birthday</button>
-      </div>
-    );
-  } else { // 如果用户已有生日信息或查看其他用户，显示生日信息
-    content = <p><strong>Birthday:</strong>{user.birthdate || 'Not set'}</p>;
-  }
-  
-  return (
-    <BaseContainer>
-      <div className="profile container">
-        <div className="profile form">
-          <h2>{user.username}&apos;s Profile</h2>
-          <p><strong>Name:</strong> {user.name}</p>
-          <p><strong>Status:</strong> {user.status}</p>
-          <p><strong>Creation Date:</strong>{user.creationdate}</p>
-          {content}
-        </div>
-      </div>
-    </BaseContainer>
-  );
-}
+  useEffect (() => {
+    if (user.id === currentUser.id){
+      if (user.birthdate === null || editingBD === true){
+        content = (
+          <div>
+            <FormFieldInput
+              label="Birthday:"
+              value={birthdate}
+              onChange={(un: string) => setBirthdate(un)}
+            />
+            <button onClick={() => updateProfile({birthdate: birthdate})}>Submit Birthday</button>
+          </div>
+        );
+        setEditingBD(false);
+      }
+      else if(editingBD === false){
+        content = (
+          <div className="profile username-container">
+            <p><strong>Birthday:</strong> {user.birthdate}</p>
+            <button className="profile button-inner" onClick={() => {setEditingBD(true);}}>Edit Birthday</button>
+          </div>
+        );
+      }
+      
+    }
+    else{
+      content = <p><strong>Birthday:</strong>{user.birthdate}</p>;
+    }
+  } , [editingBD]);
 
-为什么根本没有运行useEffect这一段？
+这样有什么问题？
