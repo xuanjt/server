@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
@@ -20,14 +21,20 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -37,6 +44,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * request without actually sending them over the network.
  * This tests if the UserController works.
  */
+// @DataJpaTest
 @WebMvcTest(UserController.class)
 public class UserControllerTest {
 
@@ -99,6 +107,96 @@ public class UserControllerTest {
         .andExpect(jsonPath("$.username", is(user.getUsername())))
         .andExpect(jsonPath("$.status", is(user.getStatus().toString())));
   }
+
+  @Test
+  public void createUser_whenUsernameExists_thenThrowConflictException() throws Exception {
+      UserPostDTO userPostDTO = new UserPostDTO();
+      userPostDTO.setUsername("existingUsername");
+      userPostDTO.setPwd("password");
+
+      when(userService.createUser(Mockito.any())).thenThrow(new ResponseStatusException(HttpStatus.CONFLICT, "Username already exists."));
+
+      MockHttpServletRequestBuilder postRequest = post("/users")
+              .contentType(MediaType.APPLICATION_JSON)
+              .content(asJsonString(userPostDTO));
+
+      mockMvc.perform(postRequest)
+              .andExpect(status().isConflict())
+              .andExpect(status().reason( "Username already exists." ))
+              .andExpect(result -> assertTrue(result.getResolvedException() instanceof ResponseStatusException));
+  }
+
+  @Test
+  public void getUserProfile_validinput_returnUser() throws Exception {
+  // given
+  User user = new User();
+  user.setId(1L);
+  user.setPwd("testpwd");
+  user.setUsername("testUsername");
+  user.setStatus(UserStatus.ONLINE);
+
+
+  Mockito.when(userService.getUserById(1L)).thenReturn(user);
+
+  // when
+  MockHttpServletRequestBuilder getRequest = get("/users/{userId}", "1")
+    .accept(MediaType.APPLICATION_JSON);
+
+  // then
+  mockMvc.perform(getRequest)
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.id", is(user.getId().intValue())))
+      .andExpect(jsonPath("$.username", is(user.getUsername())))
+      .andExpect(jsonPath("$.status", is(user.getStatus().toString())));
+  }  
+
+  @Test
+  public void getUserProfile_invalidinput_thenThrowNotFoundException() throws Exception {
+  // given
+  User user = new User();
+  user.setId(1L);
+  user.setPwd("testpwd");
+  user.setUsername("testUsername");
+  user.setStatus(UserStatus.ONLINE);
+
+
+  Mockito.when(userService.getUserById(1L)).thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "UserId cannot be found."));
+
+  // when
+  MockHttpServletRequestBuilder getRequest = get("/users/{userId}", "1")
+    .accept(MediaType.APPLICATION_JSON);
+
+  // then
+  mockMvc.perform(getRequest)
+  .andExpect(status().isNotFound())
+  .andExpect(status().reason( "UserId cannot be found." ))
+  .andExpect(result -> assertTrue(result.getResolvedException() instanceof ResponseStatusException));
+  } 
+
+  @Test
+  public void updateUserProfile_validinput_thenRenturnUser() throws Exception {
+
+    UserPostDTO userPostDTO = new UserPostDTO();
+    Mockito.doNothing().when(userService).updateUserInfo(Mockito.any(), Mockito.any());
+    mockMvc.perform(put("/users/{userId}", 1) // 假设 URL 中 {userId} 是要更新的用户 ID
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(asJsonString(userPostDTO))) // 设置请求的内容类型和请求体
+        .andExpect(status().isNoContent()); // 验证响应状态码是否为 204 No Content
+  } 
+
+  @Test
+  public void updateUserProfile_invalidinput_thenRenturnUser() throws Exception {
+
+    UserPostDTO userPostDTO = new UserPostDTO();
+    Mockito.when(userService.getUserById(1L)).thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "UserId cannot be found."));
+    mockMvc.perform(put("/users/{userId}", 1) // 假设 URL 中 {userId} 是要更新的用户 ID
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(asJsonString(userPostDTO))) // 设置请求的内容类型和请求体
+        .andExpect(status().isNotFound())
+        .andExpect(status().reason( "UserId cannot be found." ))
+        .andExpect(result -> assertTrue(result.getResolvedException() instanceof ResponseStatusException));
+  } 
+
 
   /**
    * Helper Method to convert userPostDTO into a JSON string such that the input

@@ -33,17 +33,17 @@ public class UserController {
     this.userService = userService;
   }
 
+  // update user profile
   @PutMapping("/users/{userId}")
-  @ResponseStatus(HttpStatus.OK)
-  @ResponseBody
-  public UserGetDTO updateUserProfile(@PathVariable Long userId, @RequestBody UserPostDTO userPostDTO) {
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  public void updateUserProfile(@PathVariable Long userId, @RequestBody UserPostDTO userPostDTO) {
       User user = userService.getUserById(userId);
       User userInput = DTOMapper.INSTANCE.convertUserPostDTOtoEntity(userPostDTO);
-      User userUpdated = userService.updateUserInfo(user, userInput);
-
-      return DTOMapper.INSTANCE.convertEntityToUserGetDTO(userUpdated);
+      userService.updateUserInfo(user, userInput);
   }
 
+
+  // get user profile
   @GetMapping("/users/{userId}")
   @ResponseStatus(HttpStatus.OK)
   @ResponseBody
@@ -52,49 +52,39 @@ public class UserController {
       return DTOMapper.INSTANCE.convertEntityToUserGetDTO(user);
   }
 
+
+  // get user list
   @GetMapping("/users")
   @ResponseStatus(HttpStatus.OK)
   @ResponseBody
   public List<UserGetDTO> getAllUsers() {
-    // fetch all users in the internal representation
     List<User> users = userService.getUsers();
     List<UserGetDTO> userGetDTOs = new ArrayList<>();
-
-    // convert each user to the API representation
     for (User user : users) {
       userGetDTOs.add(DTOMapper.INSTANCE.convertEntityToUserGetDTO(user));
     }
     return userGetDTOs;
   }
 
-  // This annotation is used to map HTTP POST requests onto the createUser method. 
-  // When a POST request is made to /users, this method is invoked.
+
+  // create user
   @PostMapping("/users")
   @ResponseStatus(HttpStatus.CREATED)
   @ResponseBody
-  // @RequestBody UserPostDTO userPostDTO is to bind the requestbody to the input parameter
   public UserGetDTO createUser(@RequestBody UserPostDTO userPostDTO) {
-    // convert API user to internal representation
-    // DTO -> User entity
     User userInput = DTOMapper.INSTANCE.convertUserPostDTOtoEntity(userPostDTO);
-
-    // create user
     User createdUser = userService.createUser(userInput);
-    // convert internal representation of user back to API
     return DTOMapper.INSTANCE.convertEntityToUserGetDTO(createdUser);
   }
 
+  // user login
   @PostMapping("/users/loggers")
   @ResponseStatus(HttpStatus.OK)
   @ResponseBody
   public UserGetDTO validateUser(@RequestBody UserPostDTO userPostDTO) {
-      // Convert API user to internal representation
       User userInput = DTOMapper.INSTANCE.convertUserPostDTOtoEntity(userPostDTO);
-
       User validUser = userService.validateUser(userInput);
-
+      validUser = userService.onlineUser(validUser);
       return DTOMapper.INSTANCE.convertEntityToUserGetDTO(validUser);
   }
-
-
 }

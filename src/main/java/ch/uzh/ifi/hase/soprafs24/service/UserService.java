@@ -42,21 +42,18 @@ public class UserService {
     return this.userRepository.findAll();
   }
 
+  // create user
   public User createUser(User newUser) {
     newUser.setToken(UUID.randomUUID().toString());
-    newUser.setStatus(UserStatus.OFFLINE);
     checkIfUserExists(newUser);
     newUser.setStatus(UserStatus.ONLINE);
-    // saves the given entity but data is only persisted in the database once
-    // flush() is called
     newUser = userRepository.save(newUser);
     userRepository.flush();
-    // after create a newUser and save the data, we set it as ONLINE
-
     log.debug("Created Information for User: {}", newUser);
     return newUser;
   }
 
+  // authenticate user when login
   public User validateUser(User toBeValidatedUser){
     User possibleUser = userRepository.findByUsernameAndPwd(toBeValidatedUser.getUsername(), toBeValidatedUser.getPwd());
     if (possibleUser != null){
@@ -66,18 +63,34 @@ public class UserService {
     }
   }
 
+  // get user by userId
   public User getUserById(Long userId) {
     return userRepository.findById(userId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
   }
 
-  public User updateUserInfo(User user, User userInput){
+  // update user profile
+  public void updateUserInfo(User user, User userInput){
     if (userInput.getUsername() != null) {
-      System.out.println("you're changing username!");
-      checkIfUserExists(userInput);
+      User userByUsername = userRepository.findByUsername(userInput.getUsername());
+      if (userByUsername != null && userByUsername.getId() != user.getId()){
+        throw new ResponseStatusException(HttpStatus.CONFLICT, "The username provided is not unique. Therefore, the user could not be created!");
+      }
       user.setUsername(userInput.getUsername());}
     if (userInput.getBirthdate() != null) {user.setBirthdate(userInput.getBirthdate());}
+    if (userInput.getStatus() != null) {
+      user.setStatus(userInput.getStatus());}
     user = userRepository.save(user);
     userRepository.flush();
+  }
+
+  //manage user status
+  public User offLineUser(User user){
+    user.setStatus(UserStatus.OFFLINE);
+    return user;
+  }
+
+  public User onlineUser(User user){
+    user.setStatus(UserStatus.ONLINE);
     return user;
   }
 
@@ -93,10 +106,8 @@ public class UserService {
    */
   private void checkIfUserExists(User userToBeCreated) {
     User userByUsername = userRepository.findByUsername(userToBeCreated.getUsername());
-
-    String baseErrorMessage = "The %s provided %s not unique. Therefore, the user could not be created!";
     if (userByUsername != null) {
-      throw new ResponseStatusException(HttpStatus.CONFLICT, String.format(baseErrorMessage, "username", "is"));
+      throw new ResponseStatusException(HttpStatus.CONFLICT, "The username provided is not unique. Therefore, the user could not be created!");
     }
   }
 

@@ -13,6 +13,8 @@ import org.springframework.web.server.ResponseStatusException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.time.LocalDate;
+
 /**
  * Test class for the UserResource REST resource.
  *
@@ -42,6 +44,7 @@ public class UserServiceIntegrationTest {
     User testUser = new User();
     testUser.setPwd("testPwd");
     testUser.setUsername("testUsername");
+    testUser.setCreationdate(LocalDate.of(2024, 3, 5));
 
     // when
     User createdUser = userService.createUser(testUser);
@@ -61,6 +64,7 @@ public class UserServiceIntegrationTest {
     User testUser = new User();
     testUser.setPwd("testPwd");
     testUser.setUsername("testUsername");
+    testUser.setCreationdate(LocalDate.of(2024, 3, 5));
     User createdUser = userService.createUser(testUser);
 
     // attempt to create second user with same username

@@ -34,7 +34,7 @@ public class User implements Serializable {
   private Long id;
 
   @CreatedDate
-  @Column(nullable = false, updatable = false)
+  @Column(updatable = false)
   private LocalDate creationdate;
 
   @Column(nullable = true, updatable = true)

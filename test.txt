@@ -1,32 +1,5 @@
-  let content;
-  useEffect (() => {
-    if (user.id === currentUser.id){
-      if (user.birthdate === null || editingBD === true){
-        content = (
-          <div>
-            <FormFieldInput
-              label="Birthday:"
-              value={birthdate}
-              onChange={(un: string) => setBirthdate(un)}
-            />
-            <button onClick={() => updateProfile({birthdate: birthdate})}>Submit Birthday</button>
-          </div>
-        );
-        setEditingBD(false);
-      }
-      else if(editingBD === false){
-        content = (
-          <div className="profile username-container">
-            <p><strong>Birthday:</strong> {user.birthdate}</p>
-            <button className="profile button-inner" onClick={() => {setEditingBD(true);}}>Edit Birthday</button>
-          </div>
-        );
-      }
-      
-    }
-    else{
-      content = <p><strong>Birthday:</strong>{user.birthdate}</p>;
-    }
-  } , [editingBD]);
-
-这样有什么问题？
+contentUsername = (
+<div className="profile username-container">
+    <p><strong>Username:</strong> {user.username}</p>
+    <button className="profile button-inner" onClick={() => setEditingUN(true)}>Edit Username</button>
+</div>)
