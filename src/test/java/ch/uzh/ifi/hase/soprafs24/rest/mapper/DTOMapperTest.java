@@ -2,7 +2,7 @@ package ch.uzh.ifi.hase.soprafs24.rest.mapper;
 
 import ch.uzh.ifi.hase.soprafs24.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs24.entity.User;
-import ch.uzh.ifi.hase.soprafs24.rest.dto.UserGetDTO;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.UserGetFullDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.UserPostDTO;
 import org.junit.jupiter.api.Test;
 
@@ -36,7 +36,7 @@ public class DTOMapperTest {
     user.setToken("1");
 
     // MAP -> Create UserGetDTO
-    UserGetDTO userGetDTO = DTOMapper.INSTANCE.convertEntityToUserGetDTO(user);
+    UserGetFullDTO userGetDTO = DTOMapper.INSTANCE.convertEntityToUserGetFullDTO(user);
 
     // check content
     assertEquals(user.getId(), userGetDTO.getId());

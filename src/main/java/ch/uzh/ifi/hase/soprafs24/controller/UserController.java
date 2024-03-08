@@ -1,7 +1,8 @@
 package ch.uzh.ifi.hase.soprafs24.controller;
 
 import ch.uzh.ifi.hase.soprafs24.entity.User;
-import ch.uzh.ifi.hase.soprafs24.rest.dto.UserGetDTO;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.UserGetFullDTO;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.UserGetReservedDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.UserPostDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.mapper.DTOMapper;
 import ch.uzh.ifi.hase.soprafs24.service.UserService;
@@ -36,10 +37,14 @@ public class UserController {
   // update user profile
   @PutMapping("/users/{userId}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
-  public void updateUserProfile(@PathVariable Long userId, @RequestBody UserPostDTO userPostDTO) {
-      User user = userService.getUserById(userId);
-      User userInput = DTOMapper.INSTANCE.convertUserPostDTOtoEntity(userPostDTO);
-      userService.updateUserInfo(user, userInput);
+  public void updateUserProfile(@PathVariable Long userId, @RequestBody UserPostDTO userPostDTO, @RequestHeader String authentication) {
+    User user = userService.getUserById(userId);
+    boolean isAuthenticated = userService.authenticateUser(authentication, user);
+    if (!isAuthenticated){
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "No access to edit user profile!");
+    }
+    User userInput = DTOMapper.INSTANCE.convertUserPostDTOtoEntity(userPostDTO);
+    userService.updateUserInfo(user, userInput);
   }
 
 
@@ -47,9 +52,15 @@ public class UserController {
   @GetMapping("/users/{userId}")
   @ResponseStatus(HttpStatus.OK)
   @ResponseBody
-  public UserGetDTO getUserProfile(@PathVariable Long userId) {
+  public ResponseEntity<?> getUserProfile(@PathVariable Long userId, @RequestHeader String authentication) {
       User user = userService.getUserById(userId);
-      return DTOMapper.INSTANCE.convertEntityToUserGetDTO(user);
+      if (userService.authenticateUser(authentication, user)){
+        UserGetFullDTO fullDTO = DTOMapper.INSTANCE.convertEntityToUserGetFullDTO(user);
+        return ResponseEntity.ok(fullDTO);
+      }else{
+        UserGetReservedDTO reservedDTO = DTOMapper.INSTANCE.convertEntityToUserGetReservedDTO(user);
+        return ResponseEntity.ok(reservedDTO);
+      }
   }
 
 
@@ -57,11 +68,11 @@ public class UserController {
   @GetMapping("/users")
   @ResponseStatus(HttpStatus.OK)
   @ResponseBody
-  public List<UserGetDTO> getAllUsers() {
+  public List<UserGetReservedDTO> getAllUsers() {
     List<User> users = userService.getUsers();
-    List<UserGetDTO> userGetDTOs = new ArrayList<>();
+    List<UserGetReservedDTO> userGetDTOs = new ArrayList<>();
     for (User user : users) {
-      userGetDTOs.add(DTOMapper.INSTANCE.convertEntityToUserGetDTO(user));
+      userGetDTOs.add(DTOMapper.INSTANCE.convertEntityToUserGetReservedDTO(user));
     }
     return userGetDTOs;
   }
@@ -71,20 +82,20 @@ public class UserController {
   @PostMapping("/users")
   @ResponseStatus(HttpStatus.CREATED)
   @ResponseBody
-  public UserGetDTO createUser(@RequestBody UserPostDTO userPostDTO) {
+  public UserGetFullDTO createUser(@RequestBody UserPostDTO userPostDTO) {
     User userInput = DTOMapper.INSTANCE.convertUserPostDTOtoEntity(userPostDTO);
     User createdUser = userService.createUser(userInput);
-    return DTOMapper.INSTANCE.convertEntityToUserGetDTO(createdUser);
+    return DTOMapper.INSTANCE.convertEntityToUserGetFullDTO(createdUser);
   }
 
   // user login
   @PostMapping("/users/loggers")
   @ResponseStatus(HttpStatus.OK)
   @ResponseBody
-  public UserGetDTO validateUser(@RequestBody UserPostDTO userPostDTO) {
+  public UserGetFullDTO validateUser(@RequestBody UserPostDTO userPostDTO) {
       User userInput = DTOMapper.INSTANCE.convertUserPostDTOtoEntity(userPostDTO);
       User validUser = userService.validateUser(userInput);
       validUser = userService.onlineUser(validUser);
-      return DTOMapper.INSTANCE.convertEntityToUserGetDTO(validUser);
+      return DTOMapper.INSTANCE.convertEntityToUserGetFullDTO(validUser);
   }
 }

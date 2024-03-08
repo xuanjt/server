@@ -44,8 +44,8 @@ public class UserService {
 
   // create user
   public User createUser(User newUser) {
-    newUser.setToken(UUID.randomUUID().toString());
     checkIfUserExists(newUser);
+    newUser.setToken(UUID.randomUUID().toString());
     newUser.setStatus(UserStatus.ONLINE);
     newUser = userRepository.save(newUser);
     userRepository.flush();
@@ -53,10 +53,20 @@ public class UserService {
     return newUser;
   }
 
-  // authenticate user when login
+  //authenticate user token
+  public boolean authenticateUser(String authentication, User visitedUser) {
+    if (authentication == ""){throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Current user with empty token.");}
+    if (authentication.equals(visitedUser.getToken())){
+      return true;
+    }
+    else return false;
+  }
+
+  // validate user when login
   public User validateUser(User toBeValidatedUser){
     User possibleUser = userRepository.findByUsernameAndPwd(toBeValidatedUser.getUsername(), toBeValidatedUser.getPwd());
     if (possibleUser != null){
+      possibleUser.setToken(UUID.randomUUID().toString());
       return possibleUser;
     }else{
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Invalid username or password.");
@@ -85,6 +95,7 @@ public class UserService {
 
   //manage user status
   public User offLineUser(User user){
+    user.setToken(null);
     user.setStatus(UserStatus.OFFLINE);
     return user;
   }

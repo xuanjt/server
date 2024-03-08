@@ -79,7 +79,7 @@ public class UserControllerTest {
   }
 
   @Test
-  public void createUser_validInput_userCreated() throws Exception {
+  public void createUser_validInput_ReturnUser() throws Exception {
     // given
     User user = new User();
     user.setId(1L);
@@ -87,7 +87,6 @@ public class UserControllerTest {
     user.setUsername("testUsername");
     user.setToken("1");
     user.setStatus(UserStatus.ONLINE);
-
     UserPostDTO userPostDTO = new UserPostDTO();
     userPostDTO.setPwd("testPwd");
     userPostDTO.setUsername("testUsername");
@@ -103,8 +102,10 @@ public class UserControllerTest {
     mockMvc.perform(postRequest)
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.id", is(user.getId().intValue())))
-        .andExpect(jsonPath("$.pwd", is(user.getPwd())))
+        .andExpect(jsonPath("$.token", is(user.getToken())))
         .andExpect(jsonPath("$.username", is(user.getUsername())))
+        .andExpect(jsonPath("$.creationdate", is(user.getCreationdate())))
+        .andExpect(jsonPath("$.birthdate", is(user.getBirthdate())))
         .andExpect(jsonPath("$.status", is(user.getStatus().toString())));
   }
 
@@ -127,26 +128,31 @@ public class UserControllerTest {
   }
 
   @Test
-  public void getUserProfile_validinput_returnUser() throws Exception {
+  public void getUserProfile_validinput_returnFullUser() throws Exception {
   // given
   User user = new User();
   user.setId(1L);
   user.setPwd("testpwd");
+  user.setToken("1");
   user.setUsername("testUsername");
   user.setStatus(UserStatus.ONLINE);
-
-
+  String token = "1";
   Mockito.when(userService.getUserById(1L)).thenReturn(user);
+  Mockito.when(userService.authenticateUser(Mockito.any(), Mockito.any())).thenReturn(true);
 
   // when
   MockHttpServletRequestBuilder getRequest = get("/users/{userId}", "1")
-    .accept(MediaType.APPLICATION_JSON);
+  .header("authentication", token)  
+  .accept(MediaType.APPLICATION_JSON);
 
   // then
   mockMvc.perform(getRequest)
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.id", is(user.getId().intValue())))
       .andExpect(jsonPath("$.username", is(user.getUsername())))
+      .andExpect(jsonPath("$.token", is(user.getToken())))
+      .andExpect(jsonPath("$.creationdate", is(user.getCreationdate())))
+      .andExpect(jsonPath("$.birthdate", is(user.getBirthdate())))
       .andExpect(jsonPath("$.status", is(user.getStatus().toString())));
   }  
 
@@ -156,15 +162,17 @@ public class UserControllerTest {
   User user = new User();
   user.setId(1L);
   user.setPwd("testpwd");
+  user.setToken("1");
   user.setUsername("testUsername");
   user.setStatus(UserStatus.ONLINE);
-
+  String token = "1";
 
   Mockito.when(userService.getUserById(1L)).thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "UserId cannot be found."));
 
   // when
   MockHttpServletRequestBuilder getRequest = get("/users/{userId}", "1")
-    .accept(MediaType.APPLICATION_JSON);
+  .header("authentication", token)
+  .accept(MediaType.APPLICATION_JSON);
 
   // then
   mockMvc.perform(getRequest)
@@ -175,27 +183,75 @@ public class UserControllerTest {
 
   @Test
   public void updateUserProfile_validinput_thenRenturnUser() throws Exception {
-
+    String token = "1";
     UserPostDTO userPostDTO = new UserPostDTO();
+    Mockito.when(userService.authenticateUser(Mockito.any(),Mockito.any())).thenReturn(true);
     Mockito.doNothing().when(userService).updateUserInfo(Mockito.any(), Mockito.any());
-    mockMvc.perform(put("/users/{userId}", 1) // 假设 URL 中 {userId} 是要更新的用户 ID
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(asJsonString(userPostDTO))) // 设置请求的内容类型和请求体
-        .andExpect(status().isNoContent()); // 验证响应状态码是否为 204 No Content
+    mockMvc.perform(put("/users/{userId}", 1)
+    .header("authentication", token)
+    .contentType(MediaType.APPLICATION_JSON)
+    .content(asJsonString(userPostDTO))) 
+    .andExpect(status().isNoContent()); 
   } 
 
   @Test
-  public void updateUserProfile_invalidinput_thenRenturnUser() throws Exception {
+  public void updateUserProfile_invalidinput_thenThrowNotFoundException() throws Exception {
 
     UserPostDTO userPostDTO = new UserPostDTO();
+    String token = "1";
     Mockito.when(userService.getUserById(1L)).thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "UserId cannot be found."));
     mockMvc.perform(put("/users/{userId}", 1) // 假设 URL 中 {userId} 是要更新的用户 ID
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(asJsonString(userPostDTO))) // 设置请求的内容类型和请求体
-        .andExpect(status().isNotFound())
-        .andExpect(status().reason( "UserId cannot be found." ))
-        .andExpect(result -> assertTrue(result.getResolvedException() instanceof ResponseStatusException));
+    .header("authentication", token)    
+    .contentType(MediaType.APPLICATION_JSON)
+    .content(asJsonString(userPostDTO))) // 设置请求的内容类型和请求体
+    .andExpect(status().isNotFound())
+    .andExpect(status().reason( "UserId cannot be found." ))
+    .andExpect(result -> assertTrue(result.getResolvedException() instanceof ResponseStatusException));
   } 
+
+  @Test
+  public void updateUserProfile_unauthorizeduser_thenThrowUnauthorizedException() throws Exception {
+
+    UserPostDTO userPostDTO = new UserPostDTO();
+    User user = new User();
+    Mockito.when(userService.getUserById(1L)).thenReturn(user);
+    Mockito.when(userService.authenticateUser(Mockito.any(),Mockito.any()))
+    .thenThrow(new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Current user with empty token."));
+    mockMvc.perform(put("/users/{userId}", 1)
+    .header("authentication", "")    
+    .contentType(MediaType.APPLICATION_JSON)
+    .content(asJsonString(userPostDTO)))
+    .andExpect(status().isUnauthorized())
+    .andExpect(status().reason( "Current user with empty token." ))
+    .andExpect(result -> assertTrue(result.getResolvedException() instanceof ResponseStatusException));
+  } 
+
+  @Test
+  public void updateUserProfile_nonauthentication_thenThrowUnauthorizedException() throws Exception {
+
+    UserPostDTO userPostDTO = new UserPostDTO();
+    User user = new User();
+    Mockito.when(userService.getUserById(1L)).thenReturn(user);
+    Mockito.when(userService.authenticateUser(Mockito.any(),Mockito.any())).thenReturn(false);
+    mockMvc.perform(put("/users/{userId}", 1)
+    .header("authentication", "1")    
+    .contentType(MediaType.APPLICATION_JSON)
+    .content(asJsonString(userPostDTO)))
+    .andExpect(status().isForbidden())
+    .andExpect(status().reason( "No access to edit user profile!" ))
+    .andExpect(result -> assertTrue(result.getResolvedException() instanceof ResponseStatusException));
+  }
+
+  @Test
+  public void updateUserProfile_missingheader_thenThrowUnauthorizedException() throws Exception {
+
+    UserPostDTO userPostDTO = new UserPostDTO();
+    User user = new User();
+    mockMvc.perform(put("/users/{userId}", 1) 
+    .contentType(MediaType.APPLICATION_JSON)
+    .content(asJsonString(userPostDTO)))
+    .andExpect(status().isBadRequest());
+  }
 
 
   /**

@@ -7,15 +7,12 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 
 import ch.uzh.ifi.hase.soprafs24.constant.UserStatus;
 
-public class UserGetDTO {
+public class UserGetReservedDTO {
 
   private Long id;
-  private String pwd;
   private String username;
   private UserStatus status;
-
   private LocalDate creationdate;
-
   private LocalDate birthdate;
 
   public Long getId() {
@@ -24,14 +21,6 @@ public class UserGetDTO {
 
   public void setId(Long id) {
     this.id = id;
-  }
-
-  public String getPwd() {
-    return pwd;
-  }
-
-  public void setPwd(String pwd) {
-    this.pwd = pwd;
   }
 
   public String getUsername() {

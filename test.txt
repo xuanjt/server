@@ -1,5 +1,0 @@
-contentUsername = (
-<div className="profile username-container">
-    <p><strong>Username:</strong> {user.username}</p>
-    <button className="profile button-inner" onClick={() => setEditingUN(true)}>Edit Username</button>
-</div>)
