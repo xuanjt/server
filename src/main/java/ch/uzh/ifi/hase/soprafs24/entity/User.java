@@ -23,7 +23,7 @@ import java.time.LocalDate;
  * the primary key
  */
 @Entity
-@Table(name = "USER")
+@Table(name = "Custom")
 @EntityListeners(AuditingEntityListener.class)
 public class User implements Serializable {
 

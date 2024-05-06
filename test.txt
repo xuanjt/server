@@ -1,0 +1,7 @@
+    @MockBean
+    private UserService userService;
+
+    @MockBean
+    private FriendService friendService;
+
+  注入后即使之前导入了UserService和FriendService也只是模拟注入是吗？
