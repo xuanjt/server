@@ -26,7 +26,6 @@ configurations {
 
 repositories {
     mavenCentral()
-    maven { url 'https://repo.spring.io/release' }  // Spring Release仓库
 }
 
 springBoot {
@@ -52,7 +51,7 @@ dependencies {
 
     implementation 'org.hibernate.validator:hibernate-validator'
     runtimeOnly 'org.postgresql:postgresql'
-    runtimeOnly group: 'com.google.cloud', name: 'spring-cloud-gcp-starter-secretmanager', version: '2.0.5'
+
 }
 
 bootJar {
