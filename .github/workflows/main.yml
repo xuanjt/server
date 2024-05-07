@@ -40,7 +40,6 @@ jobs:
 
       - name: Prepare app.yaml
         run: |
-          echo "runtime: java" > app.yaml
           echo "env_variables:" >> app.yaml
           echo "  DB_URL: '${{ secrets.DB_URL }}'" >> app.yaml
           echo "  DB_USERNAME: '${{ secrets.DB_USERNAME }}'" >> app.yaml
